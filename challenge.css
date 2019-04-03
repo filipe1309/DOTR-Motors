@@ -23,6 +23,15 @@ button {
     padding: 10px 20px;
 }
 
+table button {
+    background: red;
+}
+
+table button:hover,
+table button:focus {
+    background: darkred;
+}
+
 button:hover,
 button:focus {
     background: darkgreen;
