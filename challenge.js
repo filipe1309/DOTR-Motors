@@ -40,10 +40,7 @@
     
     return {
       init: function init() {
-        //var $cadastrarButton = new DOM('[type="submit"]');
-        
         this.companyInfo();
-      
       },
       
       initEvents: function initEvents() {
@@ -66,32 +63,42 @@
         var $cor = new DOM('[data-js="cor"]').get();
         var $img_url = new DOM('[data-js="img_url"]').get();
         
-        var tr = doc.createElement('tr');
+        var $tr = doc.createElement('tr');
         
-        var td_marca_modelo = doc.createElement('td');
-        var td_ano = doc.createElement('td');
-        var td_placa = doc.createElement('td');
-        var td_cor = doc.createElement('td');
-        var td_img_url = doc.createElement('td');
+        var $td_marca_modelo = doc.createElement('td');
+        var $td_ano = doc.createElement('td');
+        var $td_placa = doc.createElement('td');
+        var $td_cor = doc.createElement('td');
+        var $td_img_url = doc.createElement('td');
+        var $td_remove_button = doc.createElement('td');
         var $image = doc.createElement('img'); 
+        var $removeButton = doc.createElement('button'); 
 
-        td_marca_modelo.textContent = $marca_modelo.value;
-        td_ano.textContent = $ano.value;
-        td_placa.textContent = $placa.value;
-        
+        $removeButton.textContent = 'X';
+        $td_marca_modelo.textContent = $marca_modelo.value;
+        $td_ano.textContent = $ano.value;
+        $td_placa.textContent = $placa.value;
+        $td_remove_button.appendChild($removeButton); 
         var cor = doc.createTextNode($cor.value);
-        td_cor.appendChild(cor);
+        $td_cor.appendChild(cor);
         
+        
+        $removeButton.setAttribute('data-js', 'remove');
         $image.setAttribute('src', $img_url.value);
-        td_img_url.appendChild($image);
+        $td_img_url.appendChild($image);
         
-        tr.appendChild(td_marca_modelo);
-        tr.appendChild(td_ano);
-        tr.appendChild(td_placa);
-        tr.appendChild(td_cor);
-        tr.appendChild(td_img_url);
+        $tr.appendChild($td_marca_modelo);
+        $tr.appendChild($td_ano);
+        $tr.appendChild($td_placa);
+        $tr.appendChild($td_cor);
+        $tr.appendChild($td_img_url);
+        $tr.appendChild($td_remove_button);
         
-        return $fragment.appendChild(tr);
+        $removeButton.addEventListener('click', function() {
+          this.parentElement.parentElement.remove();
+        });
+        
+        return $fragment.appendChild($tr);
       },
       
       companyInfo: function companyInfo() {
