@@ -41,6 +41,7 @@
     return {
       init: function init() {
         this.companyInfo();
+        app.updateTable();
       },
       
       initEvents: function initEvents() {
@@ -79,14 +80,13 @@
           if (ajax.readyState == 4 && ajax.status == 200) {
             var serverResponse = JSON.parse(ajax.responseText);
             if (serverResponse.message === 'success') {
-              //console.log('success');
-              app.updateTable(carObj);
+              app.updateTable();
             } 
           }
         });
       },
       
-      updateTable: function updateTable(carObj) {
+      updateTable: function updateTable() {
         var $carrosTable = new DOM('table > tbody').get();
         $carrosTable.textContent = '';
         
@@ -138,10 +138,29 @@
         $tr.appendChild($td_remove_button);
         
         $removeButton.addEventListener('click', function() {
-          this.parentElement.parentElement.remove();
+          app.removeCar(this.parentElement.parentElement);
         });
         
         return $fragment.appendChild($tr);
+      },
+      
+      removeCar: function removeCar($car) {
+        var carQueryString = 'plate=' + $car.childNodes[2].firstChild.textContent;
+        
+        var ajax = new XMLHttpRequest();
+        ajax.open('DELETE', 'https://nodejs-filipe1309.c9users.io/car');
+        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        ajax.send(carQueryString);
+        
+        ajax.addEventListener('readystatechange', function() {
+          if (ajax.readyState == 4 && ajax.status == 200) {
+            var serverResponse = JSON.parse(ajax.responseText);
+            if (serverResponse.message === 'success') {
+              app.updateTable();
+              // $car.remove();
+            } 
+          }
+        });
       },
       
       companyInfo: function companyInfo() {
