@@ -49,20 +49,63 @@
       
       handleClickSubmitButton: function handleClickSubmitButton(event) {
         event.preventDefault();
-        var $carrosTable = new DOM('table > tbody').get();
-        $carrosTable.appendChild(app.createNewcar());
+        app.createNewcar();
       },
       
       createNewcar: function createNewcar() {
-        var $fragment = doc.createDocumentFragment();
+        var $marca_modelo = new DOM('[data-js="marca_modelo"]').get().value;
+        var $ano = new DOM('[data-js="ano"]').get().value;
+        var $placa = new DOM('[data-js="placa"]').get().value;
+        var $cor = new DOM('[data-js="cor"]').get().value;
+        var $img_url = new DOM('[data-js="img_url"]').get().value;
+        
+        var carObj = {
+          brandModel: $marca_modelo,
+          year: $ano,
+          plate: $placa,
+          color: $cor,
+          image: $img_url
+        };
+        
+        var carQueryString = Object.keys(carObj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(carObj[k]));return a},[]).join('&')
+        
+        var ajax = new XMLHttpRequest();
+        ajax.open('POST', 'https://nodejs-filipe1309.c9users.io/car');
+        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        ajax.send(carQueryString);
+        //ajax.send('image=' + $img_url.value + '&brandModel=' + $marca_modelo.value + '&year=' + $ano.value + '&plate=' + $placa.value + '&color=' + $cor.value);
+        
+        ajax.addEventListener('readystatechange', function() {
+          if (ajax.readyState == 4 && ajax.status == 200) {
+            var serverResponse = JSON.parse(ajax.responseText);
+            if (serverResponse.message === 'success') {
+              //console.log('success');
+              app.updateTable(carObj);
+            } 
+          }
+        });
+      },
       
+      updateTable: function updateTable(carObj) {
+        var $carrosTable = new DOM('table > tbody').get();
+        $carrosTable.textContent = '';
         
-        var $marca_modelo = new DOM('[data-js="marca_modelo"]').get();
-        var $ano = new DOM('[data-js="ano"]').get();
-        var $placa = new DOM('[data-js="placa"]').get();
-        var $cor = new DOM('[data-js="cor"]').get();
-        var $img_url = new DOM('[data-js="img_url"]').get();
+        var ajax = new XMLHttpRequest();
+        ajax.open('GET', 'https://nodejs-filipe1309.c9users.io/car');
+        ajax.send();
         
+        ajax.addEventListener('readystatechange', function() {
+          if (ajax.readyState == 4 && ajax.status == 200) {
+            var carsArray = JSON.parse(ajax.responseText);
+            carsArray.forEach(function(item) {
+              $carrosTable.appendChild(app.addNewCarInTable(item));
+            });
+          }
+        });
+      },
+      
+      addNewCarInTable: function addNewCarInTable(carObj) {
+        var $fragment = doc.createDocumentFragment();
         var $tr = doc.createElement('tr');
         
         var $td_marca_modelo = doc.createElement('td');
@@ -75,16 +118,16 @@
         var $removeButton = doc.createElement('button'); 
 
         $removeButton.textContent = 'X';
-        $td_marca_modelo.textContent = $marca_modelo.value;
-        $td_ano.textContent = $ano.value;
-        $td_placa.textContent = $placa.value;
+        $td_marca_modelo.textContent = carObj.brandModel;
+        $td_ano.textContent = carObj.year;
+        $td_placa.textContent = carObj.plate;
         $td_remove_button.appendChild($removeButton); 
-        var cor = doc.createTextNode($cor.value);
+        var cor = doc.createTextNode(carObj.color);
         $td_cor.appendChild(cor);
         
         
         $removeButton.setAttribute('data-js', 'remove');
-        $image.setAttribute('src', $img_url.value);
+        $image.setAttribute('src', carObj.image);
         $td_img_url.appendChild($image);
         
         $tr.appendChild($td_marca_modelo);
